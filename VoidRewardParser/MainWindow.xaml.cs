@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows;
 using VoidRewardParser.Logic;
-using Windows.Globalization;
-using Windows.Media.Ocr;
-using Windows.Storage;
 
 namespace VoidRewardParser
 {
@@ -21,6 +16,13 @@ namespace VoidRewardParser
             InitializeComponent();
             ViewModel = new MainViewModel();
             DataContext = ViewModel;
+            ViewModel.MissionComplete += ViewModel_MissionComplete;
+        }
+
+        private void ViewModel_MissionComplete(object sender, EventArgs e)
+        {
+            Activate();
+            Focus();
         }
     }
 }

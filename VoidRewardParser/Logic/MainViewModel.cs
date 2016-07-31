@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using VoidRewardParser.Entities;
 
@@ -11,7 +12,7 @@ namespace VoidRewardParser.Logic
     public class MainViewModel : INotifyPropertyChanged
     {
         DispatcherTimer _parseTimer;
-        private List<PrimeItem> _primeItems = new List<PrimeItem>();        
+        private List<PrimeItem> _primeItems = new List<PrimeItem>();
 
         public List<PrimeItem> PrimeItems
         {
@@ -27,6 +28,8 @@ namespace VoidRewardParser.Logic
                 OnNotifyPropertyChanged();
             }
         }
+
+        public event EventHandler MissionComplete;
 
         public MainViewModel()
         {
@@ -46,6 +49,11 @@ namespace VoidRewardParser.Logic
                 {
                     var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
                     PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name.ToUpper())).ToList();
+
+                    _parseTimer.Stop();
+                    MissionComplete?.Invoke(this, EventArgs.Empty);
+                    await Task.Delay(30000);
+                    _parseTimer.Start();
                 }
             }
         }
