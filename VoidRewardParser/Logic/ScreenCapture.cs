@@ -7,6 +7,9 @@ using System.Windows;
 using Windows.Globalization;
 using Windows.Media.Ocr;
 using Windows.Storage;
+using Windows.Storage.Streams;
+using System.Runtime;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace VoidRewardParser.Logic
 {
@@ -15,25 +18,23 @@ namespace VoidRewardParser.Logic
 
         public static async Task<string> ParseTextAsync()
         {
-
-            string fileName = string.Empty;
             try
             {
-                fileName = await Task.Run(() => Path.GetTempFileName());
-                await Task.Run(() => SaveScreenshot(fileName));
-                return await RunOcr(fileName);
+                using (var memoryStream = new MemoryStream())
+                using (var memoryRandomAccessStream = new InMemoryRandomAccessStream())
+                {
+                    await Task.Run(() => SaveScreenshot(memoryStream));
+                    await memoryRandomAccessStream.WriteAsync(memoryStream.ToArray().AsBuffer());
+                    return await RunOcr(memoryRandomAccessStream);
+                }
             }
             finally
             {
-                if(!string.IsNullOrWhiteSpace(fileName) && File.Exists(fileName))
-                {
-                    await Task.Run(() => File.Delete(fileName));
-                }
                 GC.Collect(0);
             }
         }
 
-        public static void SaveScreenshot(string stream)
+        public static void SaveScreenshot(Stream stream)
         {
             int width = (int)SystemParameters.FullPrimaryScreenWidth;
             int height = (int)SystemParameters.FullPrimaryScreenHeight;
@@ -46,12 +47,10 @@ namespace VoidRewardParser.Logic
             }
         }
 
-        private static async Task<string> RunOcr(string file)
+        private static async Task<string> RunOcr(IRandomAccessStream stream)
         {
             OcrEngine engine = OcrEngine.TryCreateFromUserProfileLanguages();
-            Uri uri = new Uri(file);
-            var storageFile = await StorageFile.GetFileFromPathAsync(file);
-            var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(await storageFile.OpenAsync(FileAccessMode.Read));
+            var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
             var result = await engine.RecognizeAsync(await decoder.GetSoftwareBitmapAsync());
             return result.Text;
         }
