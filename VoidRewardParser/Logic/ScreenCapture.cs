@@ -47,7 +47,7 @@ namespace VoidRewardParser.Logic
 
         private static async Task<string> RunOcr(string file)
         {
-            OcrEngine engine = OcrEngine.TryCreateFromLanguage(new Language("en-US"));
+            OcrEngine engine = OcrEngine.TryCreateFromUserProfileLanguages();
             Uri uri = new Uri(file);
             var storageFile = await StorageFile.GetFileFromPathAsync(file);
             var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(await storageFile.OpenAsync(FileAccessMode.Read));
