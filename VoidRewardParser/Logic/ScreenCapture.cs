@@ -29,6 +29,7 @@ namespace VoidRewardParser.Logic
                 {
                     await Task.Run(() => File.Delete(fileName));
                 }
+                GC.Collect(0);
             }
         }
 
