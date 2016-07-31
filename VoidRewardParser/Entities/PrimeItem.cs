@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace VoidRewardParser.Entities
 {
+    [Serializable]
     public class PrimeItem
     {
         public string Name { get; set; }

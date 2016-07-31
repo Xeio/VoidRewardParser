@@ -132,11 +132,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Entities\CacheEntry.cs" />
     <Compile Include="Entities\PrimeItem.cs" />
     <Compile Include="Entities\Rarity.cs" />
     <Compile Include="Forms\PrimeDisplay.xaml.cs">
       <DependentUpon>PrimeDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logic\CacheManager.cs" />
     <Compile Include="Logic\MainViewModel.cs" />
     <Compile Include="Logic\PrimeData.cs" />
     <Compile Include="Logic\ScreenCapture.cs" />
