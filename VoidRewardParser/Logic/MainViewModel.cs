@@ -13,6 +13,7 @@ namespace VoidRewardParser.Logic
     {
         DispatcherTimer _parseTimer;
         private List<PrimeItem> _primeItems = new List<PrimeItem>();
+        private bool _warframeNotDetected;
 
         public List<PrimeItem> PrimeItems
         {
@@ -25,6 +26,20 @@ namespace VoidRewardParser.Logic
             {
                 if (_primeItems == value) return;
                 _primeItems = value;
+                OnNotifyPropertyChanged();
+            }
+        }
+
+        public bool WarframeNotDetected
+        {
+            get
+            {
+                return _warframeNotDetected;
+            }
+            set
+            {
+                if (_warframeNotDetected == value) return;
+                _warframeNotDetected = value;
                 OnNotifyPropertyChanged();
             }
         }
@@ -55,6 +70,11 @@ namespace VoidRewardParser.Logic
                     await Task.Delay(30000);
                     _parseTimer.Start();
                 }
+                WarframeNotDetected = false;
+            }
+            else
+            {
+                WarframeNotDetected = true;
             }
         }
 

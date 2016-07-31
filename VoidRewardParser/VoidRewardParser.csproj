@@ -132,6 +132,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\RarityToColorConverter.cs" />
     <Compile Include="Entities\CacheEntry.cs" />
     <Compile Include="Entities\PrimeItem.cs" />
     <Compile Include="Entities\Rarity.cs" />

@@ -6,9 +6,15 @@
         xmlns:local="clr-namespace:VoidRewardParser"
         xmlns:forms="clr-namespace:VoidRewardParser.Forms"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Void Rewards Parser" Height="340" Width="400">
     <Grid>
-        <ListView ItemsSource="{Binding PrimeItems}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" FontSize="20" HorizontalAlignment="Center" Foreground="Red" Visibility="{Binding WarframeNotDetected, Converter={StaticResource BooleanToVilibiltyConverter}}">Warframe not detected.</TextBox>
+        
+        <ListView Grid.Row="1" ItemsSource="{Binding PrimeItems}" HorizontalContentAlignment="Stretch">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <forms:PrimeDisplay/>
