@@ -14,6 +14,7 @@ namespace VoidRewardParser.Logic
         DispatcherTimer _parseTimer;
         private List<PrimeItem> _primeItems = new List<PrimeItem>();
         private bool _warframeNotDetected;
+        private DateTime _lastMissionComplete;
 
         public List<PrimeItem> PrimeItems
         {
@@ -59,22 +60,28 @@ namespace VoidRewardParser.Logic
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
-                if (text.Contains("VOID MISSION COMPLETE") &&
-                    text.Contains("SELECT A REWARD"))
+                var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
+                PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name.ToUpper())).ToList();
+                    
+                if (text.Contains("VOID MISSION COMPLETE"))
                 {
-                    var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
-                    PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name.ToUpper())).ToList();
-
-                    _parseTimer.Stop();
-                    MissionComplete?.Invoke(this, EventArgs.Empty);
-                    await Task.Delay(30000);
-                    _parseTimer.Start();
+                    OnMissionComplete();
                 }
                 WarframeNotDetected = false;
             }
             else
             {
                 WarframeNotDetected = true;
+            }
+        }
+
+        private void OnMissionComplete()
+        {
+            if(_lastMissionComplete + TimeSpan.FromSeconds(30) < DateTime.Now)
+            {
+                //Only raise this event at most once every 30 seconds
+                MissionComplete?.Invoke(this, EventArgs.Empty);
+                _lastMissionComplete = DateTime.Now;
             }
         }
 
