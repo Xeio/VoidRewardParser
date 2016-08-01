@@ -22,7 +22,8 @@ namespace VoidRewardParser
         private void ViewModel_MissionComplete(object sender, EventArgs e)
         {
             Activate();
-            Focus();
+            Topmost = true;
+            Topmost = false;
         }
     }
 }
