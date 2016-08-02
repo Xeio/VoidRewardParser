@@ -27,7 +27,7 @@ namespace VoidRewardParser.Logic
 
         public static Dictionary<string, string> LoadLocalizedStrings()
         {
-            string language = Path.ChangeExtension(ConfigurationManager.AppSettings["Language"], ".txt");
+            string language = ConfigurationManager.AppSettings["Language"];
             if(language == "English")
             {
                 //Cheat, we don't need to localize these
