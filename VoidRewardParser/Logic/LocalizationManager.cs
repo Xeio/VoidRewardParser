@@ -9,6 +9,11 @@ namespace VoidRewardParser.Logic
     {
         private static Lazy<Dictionary<string, string>> _localizedStrings = new Lazy<Dictionary<string, string>>(() => LoadLocalizedStrings());
 
+        public static string Language
+        {
+            get { return ConfigurationManager.AppSettings["Language"]; }
+        }
+
         public static string MissionCompleteString
         {
             get { return Localize("VOID MISSION COMPLETE"); }
@@ -27,15 +32,14 @@ namespace VoidRewardParser.Logic
 
         public static Dictionary<string, string> LoadLocalizedStrings()
         {
-            string language = ConfigurationManager.AppSettings["Language"];
-            if(language == "English")
+            if (Language == "English")
             {
                 //Cheat, we don't need to localize these
                 return new Dictionary<string, string>();
             }
             if (Directory.Exists("Localization"))
             {
-                string filePath = Path.Combine("Localization", language);
+                string filePath = Path.Combine("Localization", Language);
                 filePath = Path.ChangeExtension(filePath, ".txt");
                 if (File.Exists(filePath))
                 {
@@ -51,7 +55,7 @@ namespace VoidRewardParser.Logic
                     return localizedStrings;
                 }
             }
-            throw new Exception($"Language file '{language}' not found");
+            throw new Exception($"Language file '{Language}' not found");
         }
     }
 }

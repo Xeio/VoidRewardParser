@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using Windows.Globalization;
 using Windows.Media.Ocr;
-using Windows.Storage;
 using Windows.Storage.Streams;
-using System.Runtime;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Configuration;
 
 namespace VoidRewardParser.Logic
 {
@@ -49,7 +48,15 @@ namespace VoidRewardParser.Logic
 
         private static async Task<string> RunOcr(IRandomAccessStream stream)
         {
-            OcrEngine engine = OcrEngine.TryCreateFromUserProfileLanguages();
+            OcrEngine engine = null;
+            if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["LanguageCode"]))
+            {
+                engine = OcrEngine.TryCreateFromLanguage(new Language(ConfigurationManager.AppSettings["LanguageCode"]));
+            }
+            if (engine == null)
+            {
+                engine = OcrEngine.TryCreateFromUserProfileLanguages();
+            }
             var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
             var result = await engine.RecognizeAsync(await decoder.GetSoftwareBitmapAsync());
             return result.Text;

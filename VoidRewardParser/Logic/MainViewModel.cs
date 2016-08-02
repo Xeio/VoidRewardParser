@@ -60,8 +60,8 @@ namespace VoidRewardParser.Logic
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
-                var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
-                PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name.ToUpper())).ToList();
+                var primeData = await FileCacheManager.Instance.GetValue("PrimeData" + LocalizationManager.Language, () => PrimeData.Load());
+                PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name)).ToList();
 
                 if (text.Contains(LocalizationManager.MissionCompleteString))
                 {
