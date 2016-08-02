@@ -53,6 +53,7 @@ namespace VoidRewardParser.Logic
                 {
                     itemName = entries[0];
                 }
+                itemName = LocalizationManager.Localize(itemName);
                 Rarity rarity = Rarity.Common;
                 Enum.TryParse(entries[1], true, out rarity);
 

@@ -141,6 +141,7 @@
       <DependentUpon>PrimeDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Logic\CacheManager.cs" />
+    <Compile Include="Logic\LocalizationManager.cs" />
     <Compile Include="Logic\MainViewModel.cs" />
     <Compile Include="Logic\PrimeData.cs" />
     <Compile Include="Logic\ScreenCapture.cs" />
@@ -189,7 +190,14 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Localization\LanguageTemplate.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Localization\Portugese.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -62,8 +62,8 @@ namespace VoidRewardParser.Logic
                 var text = await ScreenCapture.ParseTextAsync();
                 var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
                 PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name.ToUpper())).ToList();
-                    
-                if (text.Contains("VOID MISSION COMPLETE"))
+
+                if (text.Contains(LocalizationManager.MissionCompleteString))
                 {
                     OnMissionComplete();
                 }
