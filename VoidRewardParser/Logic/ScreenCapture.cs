@@ -9,22 +9,28 @@ using Windows.Media.Ocr;
 using Windows.Storage.Streams;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Configuration;
+using Tesseract;
+using System.Linq;
 
 namespace VoidRewardParser.Logic
 {
-    public class ScreenCapture
+    public static class ScreenCapture
     {
-
         public static async Task<string> ParseTextAsync()
         {
             try
             {
                 using (var memoryStream = new MemoryStream())
-                using (var memoryRandomAccessStream = new InMemoryRandomAccessStream())
                 {
                     await Task.Run(() => SaveScreenshot(memoryStream));
-                    await memoryRandomAccessStream.WriteAsync(memoryStream.ToArray().AsBuffer());
-                    return await RunOcr(memoryRandomAccessStream);
+                    if (Utilities.IsWindows10OrGreater())
+                    {
+                        return await RunOcr(memoryStream);
+                    }
+                    else
+                    {
+                        return await Task.Run(() => RunTesseractOcr(memoryStream));
+                    }
                 }
             }
             finally
@@ -42,24 +48,53 @@ namespace VoidRewardParser.Logic
             {
                 graphics.CopyFromScreen(0, 0, 0, 0, bitmap.Size);
                 graphics.Save();
-                bitmap.Save(stream, ImageFormat.Png);
+                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Tiff);
             }
         }
 
-        private static async Task<string> RunOcr(IRandomAccessStream stream)
+        private static async Task<string> RunOcr(MemoryStream memoryStream)
         {
-            OcrEngine engine = null;
-            if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["LanguageCode"]))
+            using (var memoryRandomAccessStream = new InMemoryRandomAccessStream())
             {
-                engine = OcrEngine.TryCreateFromLanguage(new Language(ConfigurationManager.AppSettings["LanguageCode"]));
+                await memoryRandomAccessStream.WriteAsync(memoryStream.ToArray().AsBuffer());
+                OcrEngine engine = null;
+                if (!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["LanguageCode"]))
+                {
+                    engine = OcrEngine.TryCreateFromLanguage(new Language(ConfigurationManager.AppSettings["LanguageCode"]));
+                }
+                if (engine == null)
+                {
+                    engine = OcrEngine.TryCreateFromUserProfileLanguages();
+                }
+                var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(memoryRandomAccessStream);
+                var result = await engine.RecognizeAsync(await decoder.GetSoftwareBitmapAsync());
+                return result.Text;
             }
-            if (engine == null)
+        }
+
+        private static string RunTesseractOcr(MemoryStream memoryStream)
+        {
+            var ENGLISH_LANGUAGE = @"eng";
+            using (var ocrEngine = new TesseractEngine(@".\tessdata", ENGLISH_LANGUAGE))
             {
-                engine = OcrEngine.TryCreateFromUserProfileLanguages();
+                ocrEngine.SetVariable("load_system_dawg", false);
+                ocrEngine.SetVariable("load_freq_dawg", false);
+                using (var imageWithText = Pix.LoadTiffFromMemory(memoryStream.ToArray()))
+                {
+                    using (var page = ocrEngine.Process(imageWithText))
+                    {
+                        return page.GetText();
+                    }
+                }
             }
-            var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
-            var result = await engine.RecognizeAsync(await decoder.GetSoftwareBitmapAsync());
-            return result.Text;
+        }
+
+        private static void EnsureLanguageFilesExist(string languageCode)
+        {
+            if(!Directory.GetFiles(@".\tessdata").Any(file => file.StartsWith(languageCode)))
+            {
+                Uri uri = new Uri(@"https://api.github.com/repos/tesseract-ocr/tessdata/contents");
+            }
         }
     }
 }

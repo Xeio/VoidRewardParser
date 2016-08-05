@@ -57,11 +57,19 @@ namespace VoidRewardParser.Logic
 
         private async void _parseTimer_Tick(object sender, object e)
         {
+            _parseTimer.Stop();
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
                 var primeData = await FileCacheManager.Instance.GetValue("PrimeData" + LocalizationManager.Language, () => PrimeData.Load());
-                PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name)).ToList();
+                if (Utilities.IsWindows10OrGreater())
+                {
+                    PrimeItems = primeData.Primes.Where(p => text.Contains(p.Name)).ToList();
+                }
+                else
+                {
+                    PrimeItems = primeData.Primes.Where(p => p.Tokens.All(token => text.Contains(token))).OrderByDescending(p => p.Rarity).ToList();
+                }
 
                 if (text.Contains(LocalizationManager.MissionCompleteString))
                 {
@@ -73,6 +81,7 @@ namespace VoidRewardParser.Logic
             {
                 WarframeNotDetected = true;
             }
+            _parseTimer.Start();
         }
 
         private void OnMissionComplete()
