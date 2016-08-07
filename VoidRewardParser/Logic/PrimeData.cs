@@ -25,7 +25,7 @@ namespace VoidRewardParser.Logic
 
             var uniquePrimes = primeItems.GroupBy(i => i.Name).Select(group => group.First());
 
-            return new PrimeData() { Primes = uniquePrimes.ToList() };
+            return new PrimeData() { Primes = uniquePrimes.OrderBy(p => p.Name).ToList() };
         }
 
         private static async Task<string> DownloadLootFile()
@@ -53,7 +53,6 @@ namespace VoidRewardParser.Logic
                 {
                     itemName = entries[0];
                 }
-                itemName = LocalizationManager.Localize(itemName);
                 Rarity rarity = Rarity.Common;
                 Enum.TryParse(entries[1], true, out rarity);
 
