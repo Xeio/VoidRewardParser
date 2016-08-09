@@ -25,5 +25,15 @@ namespace VoidRewardParser
             Topmost = true;
             Topmost = false;
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            ViewModel.Close();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LoadCommand.Execute();
+        }
     }
 }

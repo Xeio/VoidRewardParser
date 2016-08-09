@@ -5,14 +5,29 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VoidRewardParser.Forms"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="300" Background="{Binding Rarity, Converter={StaticResource RarityToColorConverter}}">
+             d:DesignHeight="100" d:DesignWidth="300" Background="{Binding Path=Prime.Rarity, Converter={StaticResource RarityToColorConverter}}">
     <StackPanel Margin="5">
-        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold"/>
-        <WrapPanel>
-            <TextBlock Text="Rarity: " FontSize="15" Margin="30,0,0,0"/>
-            <TextBlock Text="{Binding Rarity}" FontSize="15" FontWeight="Bold"/>
-            <TextBlock Text=",Ducats: " FontSize="15"/>
-            <TextBlock Text="{Binding Ducats}" FontSize="15" FontWeight="Bold"/>
-        </WrapPanel>
+        <TextBlock Text="{Binding Path=Prime.Name, Converter={StaticResource LocalizedStringConverter}}" FontSize="15" FontWeight="Bold"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <WrapPanel Grid.Column="0">
+                <TextBlock Text="Rarity: " FontSize="12"/>
+                <TextBlock Text="{Binding Path=Prime.Rarity}" FontSize="12" FontWeight="Bold"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="1">
+                <TextBlock Text="Ducats: " FontSize="12"/>
+                <TextBlock Text="{Binding Path=Prime.Ducats}" FontSize="12" FontWeight="Bold"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="2" HorizontalAlignment="Center">
+                <TextBlock Text="Number Owned: " FontSize="12"/>
+                <Button Width="20" Command="{Binding Path=SubtractCommand}">-</Button>
+                <TextBox Width="20" Text="{Binding Path=Data.NumberOwned, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Width="20" Command="{Binding Path=AddCommand}">+</Button>
+            </WrapPanel>
+        </Grid>
     </StackPanel>
 </UserControl>

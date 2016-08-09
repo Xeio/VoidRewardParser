@@ -6,20 +6,30 @@
         xmlns:local="clr-namespace:VoidRewardParser"
         xmlns:forms="clr-namespace:VoidRewardParser.Forms"
         mc:Ignorable="d"
-        Title="Void Rewards Parser" Height="340" Width="400">
+        Title="Void Rewards Parser" Height="340" Width="450"
+        Loaded="Window_Loaded" Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" FontSize="20" HorizontalAlignment="Center" Foreground="Red" Visibility="{Binding WarframeNotDetected, Converter={StaticResource BooleanToVilibiltyConverter}}">Warframe not detected.</Label>
-        
-        <ListView Grid.Row="1" ItemsSource="{Binding PrimeItems}" HorizontalContentAlignment="Stretch">
-            <ListView.ItemTemplate>
+
+        <ListBox Name="aoeuaoeu" Grid.Row="1" ItemsSource="{Binding Path=PrimeItems}" HorizontalContentAlignment="Stretch" VirtualizingPanel.ScrollUnit="Pixel">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=Visible}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
                 <DataTemplate>
                     <forms:PrimeDisplay/>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </Window>

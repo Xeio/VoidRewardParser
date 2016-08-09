@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Prism.Commands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 using VoidRewardParser.Entities;
 
@@ -12,11 +11,13 @@ namespace VoidRewardParser.Logic
     public class MainViewModel : INotifyPropertyChanged
     {
         DispatcherTimer _parseTimer;
-        private List<PrimeItem> _primeItems = new List<PrimeItem>();
+        private List<DisplayPrime> _primeItems = new List<DisplayPrime>();
         private bool _warframeNotDetected;
         private DateTime _lastMissionComplete;
 
-        public List<PrimeItem> PrimeItems
+        public DelegateCommand LoadCommand { get; set; }
+
+        public List<DisplayPrime> PrimeItems
         {
             get
             {
@@ -53,6 +54,23 @@ namespace VoidRewardParser.Logic
             _parseTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _parseTimer.Tick += _parseTimer_Tick;
             _parseTimer.Start();
+
+            LoadCommand = new DelegateCommand(LoadData);
+        }
+
+        private async void LoadData()
+        {
+            var primeData = await PrimeData.GetInstance();
+            foreach(var primeItem in primeData.Primes)
+            {
+                PrimeItems.Add(new DisplayPrime() { Data = primeData.GetDataForItem(primeItem), Prime = primeItem });
+            }
+        }
+
+        private bool VisibleFilter(object item)
+        {
+            var prime = item as DisplayPrime;
+            return prime.Visible;
         }
 
         private async void _parseTimer_Tick(object sender, object e)
@@ -60,8 +78,11 @@ namespace VoidRewardParser.Logic
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
-                var primeData = await FileCacheManager.Instance.GetValue("PrimeData", () => PrimeData.Load());
-                PrimeItems = primeData.Primes.Where(p => text.Contains(LocalizationManager.Localize(p.Name))).ToList();
+
+                PrimeItems.ForEach(p =>
+                {
+                    p.Visible = text.Contains(LocalizationManager.Localize(p.Prime.Name));
+                });
 
                 if (text.Contains(LocalizationManager.MissionCompleteString))
                 {
@@ -85,8 +106,13 @@ namespace VoidRewardParser.Logic
             }
         }
 
-        #region INotifyPropertyChanged
+        public async void Close()
+        {
+            (await PrimeData.GetInstance()).SaveToFile();
+        }
 
+        #region INotifyPropertyChanged
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnNotifyPropertyChanged([CallerMemberName]string propertyName = "")

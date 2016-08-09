@@ -21,6 +21,7 @@ namespace VoidRewardParser.Logic
 
         public static string Localize(string stringToLocalize)
         {
+            if (string.IsNullOrWhiteSpace(stringToLocalize)) return stringToLocalize;
             string localizedString;
             _localizedStrings.Value.TryGetValue(stringToLocalize, out localizedString);
             if (!string.IsNullOrWhiteSpace(localizedString))
