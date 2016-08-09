@@ -91,6 +91,10 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Prism, Version=6.1.0.0, Culture=neutral, PublicKeyToken=91a96d2a154366d8, processorArchitecture=MSIL">
+      <HintPath>packages\Prism.Core.6.1.0\lib\net45\Prism.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -98,7 +102,9 @@
     <Reference Include="System.Runtime.WindowsRuntime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.dll</HintPath>
+      <Private>False</Private>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -112,6 +118,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="Windows">
       <HintPath>C:\Program Files (x86)\Windows Kits\10\UnionMetadata\Windows.winmd</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -133,14 +140,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\LocalizedStringConverter.cs" />
     <Compile Include="Converters\RarityToColorConverter.cs" />
     <Compile Include="Entities\CacheEntry.cs" />
+    <Compile Include="Entities\DisplayPrime.cs" />
+    <Compile Include="Entities\ItemSaveData.cs" />
     <Compile Include="Entities\PrimeItem.cs" />
     <Compile Include="Entities\Rarity.cs" />
     <Compile Include="Forms\PrimeDisplay.xaml.cs">
       <DependentUpon>PrimeDisplay.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Logic\CacheManager.cs" />
     <Compile Include="Logic\LocalizationManager.cs" />
     <Compile Include="Logic\MainViewModel.cs" />
     <Compile Include="Logic\PrimeData.cs" />
@@ -169,6 +178,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -176,7 +186,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
