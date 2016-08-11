@@ -14,9 +14,14 @@ namespace VoidRewardParser.Logic
             get { return ConfigurationManager.AppSettings["Language"]; }
         }
 
-        public static string MissionCompleteString
+        public static string MissionComplete
         {
             get { return Localize("VOID MISSION COMPLETE"); }
+        }
+
+        public static string MissionSuccess
+        {
+            get { return Localize("MISSION SUCCESS"); }
         }
 
         public static string Localize(string stringToLocalize)

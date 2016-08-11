@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 using VoidRewardParser.Entities;
@@ -78,13 +79,35 @@ namespace VoidRewardParser.Logic
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
-
-                PrimeItems.ForEach(p =>
+                
+                var hiddenPrimes = new List<DisplayPrime>();
+                foreach (var p in PrimeItems)
                 {
-                    p.Visible = text.Contains(LocalizationManager.Localize(p.Prime.Name));
-                });
+                    if (text.Contains(LocalizationManager.Localize(p.Prime.Name)))
+                    {
+                        p.Visible = true;
+                    }
+                    else
+                    {
+                        hiddenPrimes.Add(p);
+                    }
+                }
 
-                if (text.Contains(LocalizationManager.MissionCompleteString))
+                if(hiddenPrimes.Count < PrimeItems.Count)
+                {
+                    //Only hide if we see at least one prime (let the old list persist until we need to refresh)
+                    foreach(var p in hiddenPrimes) { p.Visible = false; }
+                }
+
+                if(text.Contains(LocalizationManager.MissionSuccess) && _lastMissionComplete.AddMinutes(1) > DateTime.Now && 
+                    PrimeItems.Count - hiddenPrimes.Count == 1)
+                {
+                    //Auto-record the selected reward if we detect a prime on the mission complete screen
+                    _lastMissionComplete = DateTime.MinValue;
+                    await PrimeItems.FirstOrDefault(p => p.Visible)?.AddCommand?.Execute();
+                }
+
+                if (text.Contains(LocalizationManager.MissionComplete))
                 {
                     OnMissionComplete();
                 }

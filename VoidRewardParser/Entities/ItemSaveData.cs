@@ -7,6 +7,7 @@ namespace VoidRewardParser.Entities
     [Serializable]
     public class ItemSaveData : INotifyPropertyChanged
     {
+        private string _notes;
         private int _numberOwned;
 
         public int NumberOwned
@@ -23,6 +24,20 @@ namespace VoidRewardParser.Entities
             }
         }
         
+        public string Notes
+        {
+            get
+            {
+                return _notes;
+            }
+            set
+            {
+                if (_notes == value) return;
+                _notes = value;
+                OnNotifyPropertyChanged();
+            }
+        }
+
         #region INotifyPropertyChanged
 
         [field: NonSerialized]
