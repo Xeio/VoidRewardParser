@@ -14,6 +14,7 @@ namespace VoidRewardParser.Logic
         DispatcherTimer _parseTimer;
         private List<DisplayPrime> _primeItems = new List<DisplayPrime>();
         private bool _warframeNotDetected;
+        private bool showAllPrimes;
         private DateTime _lastMissionComplete;
 
         public DelegateCommand LoadCommand { get; set; }
@@ -43,6 +44,27 @@ namespace VoidRewardParser.Logic
             {
                 if (_warframeNotDetected == value) return;
                 _warframeNotDetected = value;
+                OnNotifyPropertyChanged();
+            }
+        }
+
+        public bool ShowAllPrimes
+        {
+            get
+            {
+                return showAllPrimes;
+            }
+            set
+            {
+                if (showAllPrimes == value) return;
+                showAllPrimes = value;
+                if (showAllPrimes)
+                {
+                    foreach(var primeItem in PrimeItems)
+                    {
+                        primeItem.Visible = true;
+                    }
+                }
                 OnNotifyPropertyChanged();
             }
         }
@@ -93,10 +115,13 @@ namespace VoidRewardParser.Logic
                     }
                 }
 
-                if(hiddenPrimes.Count < PrimeItems.Count)
+                if (!ShowAllPrimes)
                 {
-                    //Only hide if we see at least one prime (let the old list persist until we need to refresh)
-                    foreach(var p in hiddenPrimes) { p.Visible = false; }
+                    if (hiddenPrimes.Count < PrimeItems.Count)
+                    {
+                        //Only hide if we see at least one prime (let the old list persist until we need to refresh)
+                        foreach (var p in hiddenPrimes) { p.Visible = false; }
+                    }
                 }
 
                 if(text.Contains(LocalizationManager.MissionSuccess) && _lastMissionComplete.AddMinutes(1) > DateTime.Now && 

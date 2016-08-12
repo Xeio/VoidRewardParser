@@ -11,11 +11,14 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" FontSize="20" HorizontalAlignment="Center" Foreground="Red" Visibility="{Binding WarframeNotDetected, Converter={StaticResource BooleanToVilibiltyConverter}}">Warframe not detected.</Label>
-
-        <ListBox Name="aoeuaoeu" Grid.Row="1" ItemsSource="{Binding Path=PrimeItems}" HorizontalContentAlignment="Stretch" VirtualizingPanel.ScrollUnit="Pixel">
+        <WrapPanel Grid.Row="1">
+            <CheckBox IsChecked="{Binding ShowAllPrimes}">Show All Primes</CheckBox>
+        </WrapPanel>
+        <ListBox Name="aoeuaoeu" Grid.Row="2" ItemsSource="{Binding Path=PrimeItems}" HorizontalContentAlignment="Stretch" VirtualizingPanel.ScrollUnit="Pixel">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Style.Triggers>
