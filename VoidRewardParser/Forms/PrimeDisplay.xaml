@@ -10,7 +10,7 @@
         <TextBlock Text="{Binding Path=Prime.Name, Converter={StaticResource LocalizedStringConverter}}" FontSize="15" FontWeight="Bold"/>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="75"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
