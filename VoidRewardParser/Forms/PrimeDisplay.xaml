@@ -5,12 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VoidRewardParser.Forms"
              mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="300" Background="{Binding Path=Prime.Rarity, Converter={StaticResource RarityToColorConverter}}">
+             d:DesignHeight="100" d:DesignWidth="400" Background="{Binding Path=Prime.Rarity, Converter={StaticResource RarityToColorConverter}}">
     <StackPanel Margin="5">
         <TextBlock Text="{Binding Path=Prime.Name, Converter={StaticResource LocalizedStringConverter}}" FontSize="15" FontWeight="Bold"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="75"/>
+                <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -18,13 +19,17 @@
                 <TextBlock Text="Ducats: " FontSize="12"/>
                 <TextBlock Text="{Binding Path=Prime.Ducats}" FontSize="12" FontWeight="Bold"/>
             </WrapPanel>
-            <WrapPanel Grid.Column="1" HorizontalAlignment="Center" Margin="5">
+            <WrapPanel Grid.Column="1" Margin="5">
+                <TextBlock Text="Platinum: " FontSize="12"/>
+                <TextBlock Text="{Binding Path=Prime.PlatinumPrice, UpdateSourceTrigger=PropertyChanged}" FontSize="12" FontWeight="Bold"/>
+            </WrapPanel>
+            <WrapPanel Grid.Column="2" Margin="5">
                 <TextBlock Text="Number Owned: " FontSize="12"/>
                 <Button Width="20" Command="{Binding Path=SubtractCommand}">-</Button>
                 <TextBox Width="20" Text="{Binding Path=Data.NumberOwned, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Width="20" Command="{Binding Path=AddCommand}">+</Button>
             </WrapPanel>
-            <TextBox Grid.Column="2" Text="{Binding Path=Data.Notes}" FontSize="12" HorizontalAlignment="Stretch" Margin="5"/>
+            <TextBox Grid.Column="3" Text="{Binding Path=Data.Notes}" FontSize="12" HorizontalAlignment="Stretch" Margin="5"/>
         </Grid>
     </StackPanel>
 </UserControl>
