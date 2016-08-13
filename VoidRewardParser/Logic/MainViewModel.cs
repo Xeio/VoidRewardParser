@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -12,14 +13,14 @@ namespace VoidRewardParser.Logic
     public class MainViewModel : INotifyPropertyChanged
     {
         DispatcherTimer _parseTimer;
-        private List<DisplayPrime> _primeItems = new List<DisplayPrime>();
+        private ObservableCollection<DisplayPrime> _primeItems = new ObservableCollection<DisplayPrime>();
         private bool _warframeNotDetected;
         private bool showAllPrimes;
         private DateTime _lastMissionComplete;
 
         public DelegateCommand LoadCommand { get; set; }
 
-        public List<DisplayPrime> PrimeItems
+        public ObservableCollection<DisplayPrime> PrimeItems
         {
             get
             {
