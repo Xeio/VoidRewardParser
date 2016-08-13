@@ -17,6 +17,11 @@ namespace VoidRewardParser.Entities
         {
             get
             {
+                if(platPriceData == null)
+                {
+                    return "...";
+                }
+
                 return platPriceData;
             }
             set

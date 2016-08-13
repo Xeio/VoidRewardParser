@@ -75,6 +75,14 @@ namespace VoidRewardParser.Logic
 
         public event EventHandler MissionComplete;
 
+        private Dictionary<string, MarketCacheItem> _marketCache;
+
+        private struct MarketCacheItem
+        {
+            public long price;
+            public DateTime cacheTime;
+        }
+
         public MainViewModel()
         {
             _parseTimer = new DispatcherTimer();
@@ -87,6 +95,7 @@ namespace VoidRewardParser.Logic
             _updatePlatPriceTimer.Tick += _updatePlatPriceTimer_Tick;
             _updatePlatPriceTimer.Start();
 
+            _marketCache = new Dictionary<string, MarketCacheItem>();
             LoadCommand = new DelegateCommand(LoadData);
         }
 
@@ -155,15 +164,15 @@ namespace VoidRewardParser.Logic
 
         private async void _updatePlatPriceTimer_Tick(object sender, object e)
         {
-            // TODO: cache plat prices for some time so that warframe.market doesn't get overly bombed with requests
             foreach(var p in PrimeItems)
             {
                 if(p.Visible)
                 {
-                    if (p.Prime.PlatinumPrice == null)
-                    {
-                        p.Prime.PlatinumPrice = "...";
+                    if(_marketCache.ContainsKey(p.Prime.Name) && _marketCache[p.Prime.Name].cacheTime.AddMinutes(5) > DateTime.UtcNow) {
+                        // item is still less then 5 minutes old use the cached version
+                        p.Prime.PlatinumPrice = String.Format("{0}p", _marketCache[p.Prime.Name].price);
                         p.OnNotifyPropertyChanged("Prime");
+                        return;
                     }
 
                     var textInfo = new CultureInfo("en-US", false).TextInfo;
@@ -172,7 +181,7 @@ namespace VoidRewardParser.Logic
 
                     var removeBPSuffixPhrases = new string[]
                     {
-                        "Blade", "Gauntlet", "Link", "Receiver", "Handle", "Ornament", "Neuroptics", "Chassis", "Systems", "Stock", "Barrel"
+                        "Neuroptics", "Chassis", "Systems", "Harness", "Wings"
                     };
 
                     var removeBPSuffix = false;
@@ -204,7 +213,7 @@ namespace VoidRewardParser.Logic
                             if(result.code.Value > 200)
                             {
                                 Console.WriteLine("Error with {0}, Status Code: {1}", partName, result.code.Value);
-                                p.Prime.PlatinumPrice = "...";
+                                p.Prime.PlatinumPrice = null;
                                 p.OnNotifyPropertyChanged("Prime");
                                 return;
                             }
@@ -222,6 +231,8 @@ namespace VoidRewardParser.Logic
                                     }
                                 }
                             }
+
+                            _marketCache[p.Prime.Name] = new MarketCacheItem { price = smallestPrice, cacheTime = DateTime.UtcNow };
 
                             p.Prime.PlatinumPrice = String.Format("{0}p", smallestPrice);
                             p.OnNotifyPropertyChanged("Prime");
