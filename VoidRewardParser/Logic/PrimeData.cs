@@ -135,7 +135,7 @@ namespace VoidRewardParser.Logic
                 
                 if (!string.IsNullOrWhiteSpace(itemName))
                 {
-                    return new PrimeItem() { Name = itemName, Rarity = rarity, Ducats = ducats };
+                    return new PrimeItem() { Name = itemName, Rarity = rarity, Ducats = ducats, PlatinumPrice = null };
                 }
             }
             return null;
