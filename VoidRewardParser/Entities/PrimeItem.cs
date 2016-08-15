@@ -12,25 +12,5 @@ namespace VoidRewardParser.Entities
         public string Name { get; set; }
         public Rarity Rarity { get; set; }
         public int Ducats { get; set; }
-
-        public string PlatinumPrice
-        {
-            get
-            {
-                if(platPriceData == null)
-                {
-                    return "...";
-                }
-
-                return platPriceData;
-            }
-            set
-            {
-                platPriceData = value;
-            }
-        }
-
-        [NonSerialized]
-        private string platPriceData;
     }
 }

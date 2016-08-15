@@ -156,6 +156,7 @@
     </Compile>
     <Compile Include="Logic\LocalizationManager.cs" />
     <Compile Include="Logic\MainViewModel.cs" />
+    <Compile Include="Logic\PlatinumPrices.cs" />
     <Compile Include="Logic\PrimeData.cs" />
     <Compile Include="Logic\ScreenCapture.cs" />
     <Compile Include="Logic\Warframe.cs" />

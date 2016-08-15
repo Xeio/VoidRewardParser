@@ -44,8 +44,7 @@ namespace VoidRewardParser.Logic
                 _cacheLock.Release();
             }
         }
-
-
+        
         public DateTime PrimesLastRetrieved { get; set; }
         public List<PrimeItem> Primes { get; set; }
         public Dictionary<string, ItemSaveData> SavedData { get; set; } = new Dictionary<string, ItemSaveData>();
@@ -135,7 +134,7 @@ namespace VoidRewardParser.Logic
                 
                 if (!string.IsNullOrWhiteSpace(itemName))
                 {
-                    return new PrimeItem() { Name = itemName, Rarity = rarity, Ducats = ducats, PlatinumPrice = null };
+                    return new PrimeItem() { Name = itemName, Rarity = rarity, Ducats = ducats };
                 }
             }
             return null;

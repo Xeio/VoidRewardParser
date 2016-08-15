@@ -1,12 +1,11 @@
-﻿using Newtonsoft.Json;
-using Prism.Commands;
+﻿using Prism.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using VoidRewardParser.Entities;
 
@@ -15,15 +14,14 @@ namespace VoidRewardParser.Logic
     public class MainViewModel : INotifyPropertyChanged
     {
         DispatcherTimer _parseTimer;
-        DispatcherTimer _updatePlatPriceTimer;
-        private List<DisplayPrime> _primeItems = new List<DisplayPrime>();
+        private ObservableCollection<DisplayPrime> _primeItems = new ObservableCollection<DisplayPrime>();
         private bool _warframeNotDetected;
         private bool showAllPrimes;
         private DateTime _lastMissionComplete;
 
         public DelegateCommand LoadCommand { get; set; }
 
-        public List<DisplayPrime> PrimeItems
+        public ObservableCollection<DisplayPrime> PrimeItems
         {
             get
             {
@@ -67,6 +65,7 @@ namespace VoidRewardParser.Logic
                     foreach(var primeItem in PrimeItems)
                     {
                         primeItem.Visible = true;
+                        FetchPlatPriceTask(primeItem).ConfigureAwait(false);
                     }
                 }
                 OnNotifyPropertyChanged();
@@ -75,26 +74,13 @@ namespace VoidRewardParser.Logic
 
         public event EventHandler MissionComplete;
 
-        private Dictionary<string, MarketCacheItem> _marketCache;
-
-        private struct MarketCacheItem
-        {
-            public long price;
-            public DateTime cacheTime;
-        }
-
         public MainViewModel()
         {
             _parseTimer = new DispatcherTimer();
             _parseTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _parseTimer.Tick += _parseTimer_Tick;
             _parseTimer.Start();
-
-            _updatePlatPriceTimer = new DispatcherTimer();
-            _updatePlatPriceTimer.Interval = TimeSpan.FromMilliseconds(1000);
-            _updatePlatPriceTimer.Tick += _updatePlatPriceTimer_Tick;
-
-            _marketCache = new Dictionary<string, MarketCacheItem>();
+            
             LoadCommand = new DelegateCommand(LoadData);
         }
 
@@ -105,9 +91,6 @@ namespace VoidRewardParser.Logic
             {
                 PrimeItems.Add(new DisplayPrime() { Data = primeData.GetDataForItem(primeItem), Prime = primeItem });
             }
-
-            // start plat price update timer after all data is loaded
-            _updatePlatPriceTimer.Start();
         }
 
         private bool VisibleFilter(object item)
@@ -118,16 +101,19 @@ namespace VoidRewardParser.Logic
 
         private async void _parseTimer_Tick(object sender, object e)
         {
+            _parseTimer.Stop();
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
                 
                 var hiddenPrimes = new List<DisplayPrime>();
+                List<Task> fetchPlatpriceTasks = new List<Task>();
                 foreach (var p in PrimeItems)
                 {
                     if (text.Contains(LocalizationManager.Localize(p.Prime.Name)))
                     {
                         p.Visible = true;
+                        fetchPlatpriceTasks.Add(FetchPlatPriceTask(p));
                     }
                     else
                     {
@@ -157,99 +143,29 @@ namespace VoidRewardParser.Logic
                     OnMissionComplete();
                 }
                 WarframeNotDetected = false;
+
+                await Task.WhenAll(fetchPlatpriceTasks);
             }
             else
             {
                 WarframeNotDetected = true;
             }
+            _parseTimer.Start();
         }
 
-        private async void _updatePlatPriceTimer_Tick(object sender, object e)
+        private async Task FetchPlatPriceTask(DisplayPrime displayPrime)
         {
-            if (Warframe.WarframeIsRunning())
+            var minSell = await PlatinumPrices.GetPrimePlatSellOrders(displayPrime.Prime.Name);
+            if (minSell.HasValue)
             {
-                foreach (var p in PrimeItems)
-                {
-                    if (p.Visible)
-                    {
-                        if (_marketCache.ContainsKey(p.Prime.Name) && _marketCache[p.Prime.Name].cacheTime.AddMinutes(5) > DateTime.UtcNow)
-                        {
-                            // item is still less then 5 minutes old use the cached version
-                            p.Prime.PlatinumPrice = String.Format("{0}p", _marketCache[p.Prime.Name].price);
-                            p.OnNotifyPropertyChanged("Prime");
-                            return;
-                        }
-
-                        var textInfo = new CultureInfo("en-US", false).TextInfo;
-
-                        var partName = textInfo.ToTitleCase(p.Prime.Name.ToLower());
-
-                        var removeBPSuffixPhrases = new string[]
-                        {
-                            "Neuroptics", "Chassis", "Systems", "Harness", "Wings"
-                        };
-
-                        var removeBPSuffix = false;
-
-                        foreach (var phrase in removeBPSuffixPhrases)
-                        {
-                            if (partName.EndsWith(phrase + " Blueprint"))
-                            {
-                                removeBPSuffix = true;
-                            }
-                        }
-
-                        if (removeBPSuffix) partName = partName.Replace(" Blueprint", "");
-
-                        // Since Warframe.Market is still using the term Helmet instead of the new one, TODO: this might change
-                        partName = partName.Replace("Neuroptics", "Helmet");
-
-                        using (var client = new WebClient())
-                        {
-                            string baseUrl = "https://warframe.market/api/get_orders/Blueprint/";
-
-                            var uri = new Uri(baseUrl + partName);
-
-                            client.DownloadStringCompleted += (_, ev) =>
-                            {
-                                dynamic result = JsonConvert.DeserializeObject(ev.Result);
-
-                                // when the server responds anything that is not 200 (HTTP OK) don't bother doing something else
-                                if (result.code.Value > 200)
-                                {
-                                    Console.WriteLine("Error with {0}, Status Code: {1}", partName, result.code.Value);
-                                    p.Prime.PlatinumPrice = null;
-                                    p.OnNotifyPropertyChanged("Prime");
-                                    return;
-                                }
-
-                                var smallestPrice = long.MaxValue;
-
-                                foreach (var sellOrder in result.response.sell)
-                                {
-                                    // only users who're online are interesting usually
-                                    if (sellOrder.online_status.Value || sellOrder.online_ingame.Value)
-                                    {
-                                        if (sellOrder.price < smallestPrice)
-                                        {
-                                            smallestPrice = sellOrder.price.Value;
-                                        }
-                                    }
-                                }
-
-                                _marketCache[p.Prime.Name] = new MarketCacheItem { price = smallestPrice, cacheTime = DateTime.UtcNow };
-
-                                p.Prime.PlatinumPrice = String.Format("{0}p", smallestPrice);
-                                p.OnNotifyPropertyChanged("Prime");
-                            };
-
-                            await client.DownloadStringTaskAsync(uri);
-                        }
-                    }
-                }
+                displayPrime.PlatinumPrice = minSell.ToString();
+            }
+            else
+            {
+                displayPrime.PlatinumPrice = "?";
             }
         }
-
+        
         private void OnMissionComplete()
         {
             if(_lastMissionComplete + TimeSpan.FromSeconds(30) < DateTime.Now)

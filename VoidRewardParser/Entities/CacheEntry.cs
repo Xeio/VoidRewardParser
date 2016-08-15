@@ -2,10 +2,20 @@
 
 namespace VoidRewardParser.Entities
 {
-    public class CacheEntry
+    public class CacheEntry<T>
     {
         public DateTime Timestamp { get; set; }
-        public object Value { get; set; }
+        public T Value { get; set; }
+
+        public CacheEntry()
+        {
+            Timestamp = DateTime.Now;
+        }
+
+        public CacheEntry(T value) : this()
+        {
+            Value = value;
+        }
 
         public bool IsExpired(TimeSpan timeout)
         {

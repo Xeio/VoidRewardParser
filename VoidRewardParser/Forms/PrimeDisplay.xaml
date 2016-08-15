@@ -11,7 +11,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="75"/>
-                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="90"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -21,7 +21,7 @@
             </WrapPanel>
             <WrapPanel Grid.Column="1" Margin="5">
                 <TextBlock Text="Platinum: " FontSize="12"/>
-                <TextBlock Text="{Binding Path=Prime.PlatinumPrice, UpdateSourceTrigger=PropertyChanged}" FontSize="12" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Path=PlatinumPrice}" FontSize="12" FontWeight="Bold"/>
             </WrapPanel>
             <WrapPanel Grid.Column="2" Margin="5">
                 <TextBlock Text="Number Owned: " FontSize="12"/>

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:VoidRewardParser"
         xmlns:forms="clr-namespace:VoidRewardParser.Forms"
         mc:Ignorable="d"
-        Title="Void Rewards Parser" Height="340" Width="450"
+        Title="Void Rewards Parser" Height="340" Width="500"
         Loaded="Window_Loaded" Closed="Window_Closed">
     <Grid>
         <Grid.RowDefinitions>
