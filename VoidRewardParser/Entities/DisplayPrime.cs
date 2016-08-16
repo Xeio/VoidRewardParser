@@ -1,4 +1,5 @@
 ﻿using Prism.Commands;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -9,6 +10,7 @@ namespace VoidRewardParser.Entities
         private PrimeItem _prime;
         private ItemSaveData _data;
         private bool _visible;
+        private string _platinumPrice;
 
         public PrimeItem Prime
         {
@@ -48,6 +50,25 @@ namespace VoidRewardParser.Entities
             {
                 if (_visible == value) return;
                 _visible = value;
+                OnNotifyPropertyChanged();
+            }
+        }
+
+        public string PlatinumPrice
+        {
+            get
+            {
+                if (_platinumPrice == null)
+                {
+                    return "...";
+                }
+
+                return _platinumPrice;
+            }
+            set
+            {
+                if (_platinumPrice == value) return;
+                _platinumPrice = value;
                 OnNotifyPropertyChanged();
             }
         }

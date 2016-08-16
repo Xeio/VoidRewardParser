@@ -44,8 +44,7 @@ namespace VoidRewardParser.Logic
                 _cacheLock.Release();
             }
         }
-
-
+        
         public DateTime PrimesLastRetrieved { get; set; }
         public List<PrimeItem> Primes { get; set; }
         public Dictionary<string, ItemSaveData> SavedData { get; set; } = new Dictionary<string, ItemSaveData>();

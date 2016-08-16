@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using VoidRewardParser.Entities;
 
@@ -64,6 +65,7 @@ namespace VoidRewardParser.Logic
                     foreach(var primeItem in PrimeItems)
                     {
                         primeItem.Visible = true;
+                        FetchPlatPriceTask(primeItem).ConfigureAwait(false);
                     }
                 }
                 OnNotifyPropertyChanged();
@@ -78,7 +80,7 @@ namespace VoidRewardParser.Logic
             _parseTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _parseTimer.Tick += _parseTimer_Tick;
             _parseTimer.Start();
-
+            
             LoadCommand = new DelegateCommand(LoadData);
         }
 
@@ -99,16 +101,19 @@ namespace VoidRewardParser.Logic
 
         private async void _parseTimer_Tick(object sender, object e)
         {
+            _parseTimer.Stop();
             if (Warframe.WarframeIsRunning())
             {
                 var text = await ScreenCapture.ParseTextAsync();
                 
                 var hiddenPrimes = new List<DisplayPrime>();
+                List<Task> fetchPlatpriceTasks = new List<Task>();
                 foreach (var p in PrimeItems)
                 {
                     if (text.Contains(LocalizationManager.Localize(p.Prime.Name)))
                     {
                         p.Visible = true;
+                        fetchPlatpriceTasks.Add(FetchPlatPriceTask(p));
                     }
                     else
                     {
@@ -138,13 +143,29 @@ namespace VoidRewardParser.Logic
                     OnMissionComplete();
                 }
                 WarframeNotDetected = false;
+
+                await Task.WhenAll(fetchPlatpriceTasks);
             }
             else
             {
                 WarframeNotDetected = true;
             }
+            _parseTimer.Start();
         }
 
+        private async Task FetchPlatPriceTask(DisplayPrime displayPrime)
+        {
+            var minSell = await PlatinumPrices.GetPrimePlatSellOrders(displayPrime.Prime.Name);
+            if (minSell.HasValue)
+            {
+                displayPrime.PlatinumPrice = minSell.ToString();
+            }
+            else
+            {
+                displayPrime.PlatinumPrice = "?";
+            }
+        }
+        
         private void OnMissionComplete()
         {
             if(_lastMissionComplete + TimeSpan.FromSeconds(30) < DateTime.Now)
