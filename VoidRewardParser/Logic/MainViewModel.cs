@@ -138,7 +138,7 @@ namespace VoidRewardParser.Logic
                     await PrimeItems.FirstOrDefault(p => p.Visible)?.AddCommand?.Execute();
                 }
 
-                if (text.Contains(LocalizationManager.MissionComplete) && PrimeItems.Count - hiddenPrimes.Count > 0)
+                if (text.Contains(LocalizationManager.SelectAReward) && PrimeItems.Count - hiddenPrimes.Count > 0)
                 {
                     OnMissionComplete();
                 }
