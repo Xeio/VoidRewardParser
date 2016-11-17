@@ -85,10 +85,15 @@ namespace VoidRewardParser.Logic
                 var primeItems = primeLootLines.Select(l => TryParseLine(l)).Where(i => i != null);
 
                 var uniquePrimes = primeItems.GroupBy(i => i.Name).Select(group => group.First());
+                
+                var newPrimes = uniquePrimes.OrderBy(p => p.Name).ToList();
 
-                primeData.Primes = uniquePrimes.OrderBy(p => p.Name).ToList();
+                if (newPrimes.Count > 0)
+                {
+                    primeData.Primes = newPrimes;
 
-                primeData.PrimesLastRetrieved = DateTime.Now;
+                    primeData.PrimesLastRetrieved = DateTime.Now;
+                }
             }
 
             primeData.SaveToFile();
