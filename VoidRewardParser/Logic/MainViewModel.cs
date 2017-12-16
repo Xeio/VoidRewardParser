@@ -65,7 +65,6 @@ namespace VoidRewardParser.Logic
                     foreach(var primeItem in PrimeItems)
                     {
                         primeItem.Visible = true;
-                        FetchPlatPriceTask(primeItem).ConfigureAwait(false);
                     }
                 }
                 OnNotifyPropertyChanged();

@@ -15,7 +15,7 @@ namespace VoidRewardParser.Logic
     {
         private static TimeSpan _expirationTimespan = TimeSpan.Parse(ConfigurationManager.AppSettings["PlatinumCacheExpiration"]);
         private static Dictionary<string, CacheEntry<long?>> _marketCache = new Dictionary<string, CacheEntry<long?>>();
-        private const string _baseUrl = "https://warframe.market/api/get_orders/Blueprint/";
+        private const string _baseUrl = "https://api.warframe.market/v1/items/{0}/orders";
         private static readonly string[] _removeBPSuffixPhrases = new[]{
             "Neuroptics", "Chassis", "Systems", "Harness", "Wings"
         };
@@ -41,28 +41,12 @@ namespace VoidRewardParser.Logic
                 }
             }
 
-            var textInfo = new CultureInfo("en-US", false).TextInfo;
-
-            var partName = textInfo.ToTitleCase(primeName.ToLower());
-
-            if (_removeBPSuffixPhrases.Any(suffix => partName.EndsWith(suffix + " Blueprint")))
-            {
-                partName = partName.Replace(" Blueprint", "");
-            }
-
-            // Since Warframe.Market is still using the term Helmet instead of the new one, TODO: this might change
-            partName = partName.Replace("Neuroptics", "Helmet");
-
-            if (_fixedQueryStrings.ContainsKey(partName))
-            {
-                //Some of Warframe.Market's query strings are mangled (extra spaces, misspellings, words missing) fix them manually...
-                partName = _fixedQueryStrings[partName];
-            }
+            var partName = primeName.ToLower().Replace(' ', '_');
 
             string jsonData;
             using (var client = new WebClient())
             {
-                var uri = new Uri(_baseUrl + Uri.EscapeDataString(partName));
+                var uri = new Uri(string.Format(_baseUrl, Uri.EscapeDataString(partName)));
 
                 try
                 {
@@ -70,17 +54,12 @@ namespace VoidRewardParser.Logic
 
                     dynamic result = JsonConvert.DeserializeObject(jsonData);
 
-                    // when the server responds anything that is not 200 (HTTP OK) don't bother doing something else
-                    if (result.code != 200)
-                    {
-                        Debug.WriteLine($"Error with {partName}, Status Code: {result.code.Value}");
-                        _marketCache[primeName] = new CacheEntry<long?>(null);
-                        return null;
-                    }
-
-                    IEnumerable<dynamic> sellOrders = result.response.sell;
-                    long? smallestPrice = sellOrders.Where(order => order.online_status).Min(order => order.price);
-
+                    IEnumerable<dynamic> orders = result.payload.orders;
+                    long? smallestPrice = orders
+                        .Where(order => order.user.status == "online" || order.user.status == "ingame")
+                        .Where(order => order.order_type == "sell")
+                        .Min(order => order.platinum);
+                    
                     _marketCache[primeName] = new CacheEntry<long?>(smallestPrice);
                     return smallestPrice;
                 }
