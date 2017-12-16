@@ -24,5 +24,9 @@ namespace VoidRewardParser.Forms
         {
             InitializeComponent();
         }
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start((sender as Hyperlink).NavigateUri.AbsoluteUri);
+        }
     }
 }
