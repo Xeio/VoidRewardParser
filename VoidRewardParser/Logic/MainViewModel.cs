@@ -75,8 +75,10 @@ namespace VoidRewardParser.Logic
 
         public MainViewModel()
         {
-            _parseTimer = new DispatcherTimer();
-            _parseTimer.Interval = TimeSpan.FromMilliseconds(1000);
+            _parseTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(1000)
+            };
             _parseTimer.Tick += _parseTimer_Tick;
             _parseTimer.Start();
             

@@ -32,8 +32,7 @@ namespace VoidRewardParser.Logic
 
         public static async Task<long?> GetPrimePlatSellOrders(string primeName)
         {
-            CacheEntry<long?> cacheItem;
-            if (_marketCache.TryGetValue(primeName, out cacheItem))
+            if (_marketCache.TryGetValue(primeName, out CacheEntry<long?> cacheItem))
             {
                 if (!cacheItem.IsExpired(_expirationTimespan))
                 {
