@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -78,22 +79,24 @@ namespace VoidRewardParser.Logic
                 //Update the cached Primes
                 string lootFileText = await DownloadLootFile();
 
-                var lootFileLines = lootFileText.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var doc = new HtmlDocument();
+                doc.LoadHtml(lootFileText);
 
-                var primeLootLines = lootFileLines.Where(line => line.Contains("PRIME"));
+                var relicTable = doc.DocumentNode.Descendants().First(n => n.InnerText == "Relics:").NextSibling;
 
-                var primeItems = primeLootLines.Select(l => TryParseLine(l)).Where(i => i != null);
+                var primeRewardNodes = relicTable.SelectNodes("tr[td[2]]");
 
-                var uniquePrimes = primeItems.GroupBy(i => i.Name).Select(group => group.First());
-                
-                var newPrimes = uniquePrimes.OrderBy(p => p.Name).ToList();
+                primeData.Primes = primeRewardNodes.Select(node =>
+                    new PrimeItem()
+                    {
+                        Name = node.ChildNodes[0].InnerText,
+                        Rarity = node.ChildNodes[1].InnerText.Contains("Rare") ? Rarity.Rare : node.ChildNodes[1].InnerText.Contains("Uncommon") ? Rarity.Uncommon : Rarity.Common
+                    })
+                    .GroupBy(i => i.Name)
+                    .Select(g => g.First())
+                    .ToList();
 
-                if (newPrimes.Count > 0)
-                {
-                    primeData.Primes = newPrimes;
-
-                    primeData.PrimesLastRetrieved = DateTime.Now;
-                }
+                primeData.PrimesLastRetrieved = DateTime.Now;
             }
 
             primeData.SaveToFile();
@@ -109,40 +112,6 @@ namespace VoidRewardParser.Logic
                 var uri = new Uri(file);
                 return await client.DownloadStringTaskAsync(uri);
             }
-        }
-
-        private static PrimeItem TryParseLine(string line)
-        {
-            //1 MAG PRIME BLUEPRINT, RARE, I: 2 %, E: 4 %, F: 6 %, R: 10 %, 100 Ducats
-            var entries = line.Split(',').Select(s => s.Trim()).ToList();
-            if (entries.Count >= 7)
-            {
-                string itemName;
-                if (entries[0].StartsWith("1 "))
-                {
-                    itemName = entries[0].Substring(2); //trim the number and space from the front
-                }
-                else
-                {
-                    itemName = entries[0];
-                }
-                Rarity rarity = Rarity.Common;
-                Enum.TryParse(entries[1], true, out rarity);
-
-                int ducats = 0;
-                var ducatSplit = entries[6].Split(' ');
-                if (ducatSplit.Length == 2)
-                {
-                    var ducatString = ducatSplit[0];
-                    int.TryParse(ducatString, out ducats);
-                }
-                
-                if (!string.IsNullOrWhiteSpace(itemName))
-                {
-                    return new PrimeItem() { Name = itemName, Rarity = rarity, Ducats = ducats };
-                }
-            }
-            return null;
         }
 
         public void SaveToFile()

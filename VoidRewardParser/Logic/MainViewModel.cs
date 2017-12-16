@@ -110,7 +110,7 @@ namespace VoidRewardParser.Logic
                 List<Task> fetchPlatpriceTasks = new List<Task>();
                 foreach (var p in PrimeItems)
                 {
-                    if (text.Contains(LocalizationManager.Localize(p.Prime.Name)))
+                    if (text.IndexOf(LocalizationManager.Localize(p.Prime.Name), StringComparison.InvariantCultureIgnoreCase) != -1)
                     {
                         p.Visible = true;
                         fetchPlatpriceTasks.Add(FetchPlatPriceTask(p));
