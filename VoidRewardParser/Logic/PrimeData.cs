@@ -96,6 +96,13 @@ namespace VoidRewardParser.Logic
                     .Select(g => g.First())
                     .ToList();
 
+                foreach(var prime in primeData.Primes)
+                {
+                    prime.Name = prime.Name.Replace("Systems Blueprint", "Systems");
+                    prime.Name = prime.Name.Replace("Chassis Blueprint", "Chassis");
+                    prime.Name = prime.Name.Replace("Neuroptics Blueprint", "Neuroptics");
+                }
+
                 primeData.PrimesLastRetrieved = DateTime.Now;
             }
 
